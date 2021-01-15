@@ -17,7 +17,7 @@ namespace PAMDomain.Projects
         private PlatformDomain _PlatformDomain;
         public Lazy<PlatformDomain> PlatformDomain => new Lazy<PlatformDomain>(() => LoadPlatform());
 
-        public Lazy<List<Chapter>> Chapters => new Lazy<List<Chapter>>(() => LoadChapters());
+        public Lazy<List<ChapterDomain>> Chapters => new Lazy<List<ChapterDomain>>(() => LoadChapters());
 
         private List<MaturityModelDefined> _MaturityModels;
         public Lazy<List<MaturityModelDefined>> MaturityModels => new Lazy<List<MaturityModelDefined>>(() => LoadMaturityModelDefined());
@@ -44,22 +44,25 @@ namespace PAMDomain.Projects
 
         public async Task SetMaturityModel(Guid maturityModelId, int value)
         {
-            var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
-
             var maturityDefined = MaturityModels.Value.FirstOrDefault(m => m.MaturityModelId == maturityModelId);
+
+            var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
+            var maturity = await maturityRepo.GetAsync(maturityModelId);
+
+            if (maturity == null)
+                throw new DefineMaturityModelNotFoundException(maturityModelId, this);
+
+            if(!maturity.Options.Exists(o => o.Value == value))
+                throw new DefineOptionMaturityModelNotFoundException(this, maturity, value);
 
             if (maturityDefined == null)
             {
-                maturityDefined = new MaturityModelDefined();
+                maturityDefined = await MaturityModelDefined.CreateAsync(this, maturity, value);
                 MaturityModels.Value.Add(maturityDefined);
+            } else
+            {
+                await maturityDefined.UpdateAsync(value);
             }
-
-            var maturity = await maturityRepo.Get(maturityModelId);
-
-            if (maturity == null)
-                throw new Exception();
-
-            await MaturityModelDefined.Create(this, maturity, value);            
         }
 
         public async Task SaveAsync()
@@ -79,7 +82,7 @@ namespace PAMDomain.Projects
             return _PlatformDomain;
         }
 
-        private List<Chapter> LoadChapters()
+        private List<ChapterDomain> LoadChapters()
         {
             throw new NotImplementedException();
         }

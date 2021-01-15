@@ -8,7 +8,14 @@ namespace PAMDomain.Repositories
 {
     public interface IMaturityModelRepository
     {
-        Task<IList<MaturityModelDomain>> List();
-        Task<MaturityModelDomain> Get(Guid maturityModelId);
+        Task<IList<MaturityModelDomain>> ListAsync();
+        Task<MaturityModelDomain> GetAsync(Guid maturityModelId);
+        Task<IList<MaturityModelDomain>> Get(params Guid[] maturityModelId);
+        Task<MaturityModelProjectDomain> GetProjectAsync(Guid projectId);
+        Task<IList<MaturityModelDomain>> GetMaturitiesByChapters(params Guid[] guids);
+        Task<IList<CampDomain>> GetCampsByChapters(Guid[] guids);
+        Task SaveAsync(MaturityModelDomain mm);
+
+        Task<IList<ChapterDomain>> GetChaptersAsync(params Guid[] chapterIds);
     }
 }

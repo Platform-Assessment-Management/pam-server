@@ -17,11 +17,11 @@ namespace PAMDomain.Projects
 
         public int Value { get; private set; }
 
-        public MaturityModelDefined() {
+        private MaturityModelDefined() {
             MaturityModelDefinedId = Guid.NewGuid();
         }
 
-        public static async Task<MaturityModelDefined> Create(ProjectDomain project, MaturityModelDomain maturity, int value)
+        public static async Task<MaturityModelDefined> CreateAsync(ProjectDomain project, MaturityModelDomain maturity, int value)
         {
             var mm = new MaturityModelDefined {
                 MaturityModelId = maturity.MaturityModelId,
@@ -35,7 +35,7 @@ namespace PAMDomain.Projects
             return mm;
         }
 
-        public async Task Update(int value)
+        public async Task UpdateAsync(int value)
         {
             Value = value;
 

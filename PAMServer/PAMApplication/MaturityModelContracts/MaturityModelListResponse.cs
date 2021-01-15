@@ -16,5 +16,7 @@ namespace PAMApplication.MaturityModelContracts
         public int Order { get; set; }
 
         public IList<OptionsDTO> Options { get; set; }
+
+        public IList<Guid> ChaptersIds { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson.Serialization;
+using PAMDomain;
 using PAMDomain.MaturityModels;
 using PAMDomain.Platforms;
 using PAMDomain.Projects;
@@ -12,6 +13,11 @@ namespace PAMRepository
     {
         public static void BSONMap()
         {
+            BsonClassMap.RegisterClassMap<ChapterDomain>(p => {
+                p.MapIdField(x => x.ChapterId);
+                p.MapMember(x => x.Name);
+            });
+
             BsonClassMap.RegisterClassMap<PlatformDomain>(p => {
                 p.MapIdField(x => x.PlatformId);
                 p.MapMember(x => x.Name);
@@ -35,9 +41,10 @@ namespace PAMRepository
                 p.MapMember(x => x.Name);
                 p.MapMember(x => x.Description);
                 p.MapMember(x => x.Options);
+                p.MapMember(x => x.ChaptersIds);
             });
 
-            BsonClassMap.RegisterClassMap<Options>(p => {
+            BsonClassMap.RegisterClassMap<OptionsDomain>(p => {
                 p.MapMember(x => x.Name);
                 p.MapMember(x => x.Value);
                 p.MapMember(x => x.Level);

@@ -12,6 +12,8 @@ namespace PAMRepository.Configuration
         public string PlatformCollectionName { get; set; }
         public string MaturityModelsCollectionName { get; set; }
         public string MaturityProjectCollectionName { get; set; }
+
+        public string ChapterCollectionName { get; set; }
     }
 
     public interface IPAMDatabaseSettings
@@ -23,5 +25,6 @@ namespace PAMRepository.Configuration
 
         string MaturityModelsCollectionName { get; set; }
         string MaturityProjectCollectionName { get; set; }
+        string ChapterCollectionName { get; }
     }
 }

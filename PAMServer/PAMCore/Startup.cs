@@ -47,10 +47,12 @@ namespace PAMCore
                 return client.GetDatabase(settings.DatabaseName);
             });
 
+            services.AddSingleton<ChapterApplication>();
             services.AddSingleton<PlatformApplication>();
             services.AddSingleton<ProjectApplication>();
             services.AddSingleton<MaturityModelApplication>();
 
+            services.AddSingleton<IChapterRepository, ChapterRepository>();
             services.AddSingleton<IPlatformRepository, PlatformRepository>();
             services.AddSingleton<IProjectRepository, ProjectRepository>();
             services.AddSingleton<IMaturityModelRepository, MaturityModelRepository>();
