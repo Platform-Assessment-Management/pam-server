@@ -12,7 +12,7 @@ namespace PAMDomain.MaturityModels
 
         public void SetCamp(CampDomain camp, double value)
         {
-            CampResult[camp.MaturityModeCampId] = value;
+            CampResult[camp.CampId] = value;
         }
 
         internal void SetMaturity(MaturityModelDomain mm, double value)

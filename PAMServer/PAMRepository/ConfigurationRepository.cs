@@ -41,7 +41,15 @@ namespace PAMRepository
                 p.MapMember(x => x.Name);
                 p.MapMember(x => x.Description);
                 p.MapMember(x => x.Options);
-                p.MapMember(x => x.ChaptersIds);
+            });
+
+            BsonClassMap.RegisterClassMap<CampDomain>(p =>
+            {
+                p.MapIdField(x => x.CampId);
+                p.MapMember(x => x.Name);
+                p.MapMember(x => x.Description);
+                p.MapMember(x => x.Order);
+                p.MapMember(x => x.CampLevel);
             });
 
             BsonClassMap.RegisterClassMap<OptionsDomain>(p => {

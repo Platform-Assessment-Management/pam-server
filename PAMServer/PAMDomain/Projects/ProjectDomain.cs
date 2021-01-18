@@ -17,10 +17,13 @@ namespace PAMDomain.Projects
         private PlatformDomain _PlatformDomain;
         public Lazy<PlatformDomain> PlatformDomain => new Lazy<PlatformDomain>(() => LoadPlatform());
 
-        public Lazy<List<ChapterDomain>> Chapters => new Lazy<List<ChapterDomain>>(() => LoadChapters());
+        public List<Guid> ChaptersIds { get; private set; }
+        public List<ChapterDomain> Chapters { get; private set; }
 
         private List<MaturityModelDefined> _MaturityModels;
         public Lazy<List<MaturityModelDefined>> MaturityModels => new Lazy<List<MaturityModelDefined>>(() => LoadMaturityModelDefined());
+
+        
 
         private ProjectDomain() { }
 
@@ -63,6 +66,12 @@ namespace PAMDomain.Projects
             {
                 await maturityDefined.UpdateAsync(value);
             }
+        }
+
+        public async Task SetChaptersAsync(IList<Guid> chaptersId)
+        {
+            var projectRepo = UtilDomain.GetService<IProjectRepository>();
+            var chapters = await projectRepo.GetChapters(chaptersId);
         }
 
         public async Task SaveAsync()

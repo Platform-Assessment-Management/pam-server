@@ -9,9 +9,10 @@ namespace PAMDomain.Repositories
     public interface IProjectRepository
     {
         Task Save(ProjectDomain project);
-        Task<ProjectDomain> Get(Guid projectId);
+        Task<IList<ProjectDomain>> GetAsync(Guid? projectId = null);
         Task AddMaturityModel(MaturityModelDefined maturityModelDefined);
         Task<List<MaturityModelDefined>> GetMaturityModel(Guid projectId);
         Task UpdateMaturityModel(MaturityModelDefined mm);
+        Task<IList<ChapterDomain>> GetChapters(IList<Guid> chaptersId);
     }
 }

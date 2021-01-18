@@ -25,9 +25,12 @@ namespace PAMRepository.Impl
             await maturityProjectsDatabase.InsertOneAsync(maturityModelDefined);
         }
 
-        public async Task<ProjectDomain> Get(Guid projectId)
+        public async Task<IList<ProjectDomain>> GetAsync(Guid? projectId)
         {
-            return await (await projects.FindAsync(p => p.ProjectId == projectId)).FirstOrDefaultAsync();
+            var hasProject = projectId.HasValue;
+            var projectIdValue = projectId.HasValue ? projectId.Value : new Guid();
+
+            return await (await projects.FindAsync(p => !hasProject || p.ProjectId == projectId)).ToListAsync();
         }
 
         public async Task<List<MaturityModelDefined>> GetMaturityModel(Guid projectId)

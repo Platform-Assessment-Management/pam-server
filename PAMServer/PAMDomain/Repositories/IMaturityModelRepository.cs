@@ -17,5 +17,7 @@ namespace PAMDomain.Repositories
         Task SaveAsync(MaturityModelDomain mm);
 
         Task<IList<ChapterDomain>> GetChaptersAsync(params Guid[] chapterIds);
+        Task<IList<CampDomain>> GetCampsAsync(Guid? campId = null);
+        Task SaveCampAsync(CampDomain camp);
     }
 }

@@ -20,7 +20,13 @@ namespace PAMCore.Controllers
         [HttpPost]
         public async Task CreateProject(ProjectCreateRequest projectRequest)
         {
-            await ProjectApp.CreateProject(projectRequest);
+            await ProjectApp.CreateProjectAsync(projectRequest);
+        }
+
+        [HttpGet]
+        public async Task<ProjectListResponse> ListProject()
+        {
+            return await ProjectApp.ListProjectAsync();
         }
 
         [HttpPost("{projectId}/maturitymodel/{maturidyModelId}/value/{value}")]
@@ -33,6 +39,13 @@ namespace PAMCore.Controllers
         public async Task<List<ProjectMaturityModelListResponse>> ListMaturityModel([FromRoute]Guid projectID)
         {
             return await ProjectApp.GetMaturityModel(projectID);
+        }
+
+        [HttpPost("{projectId}/chapters")]
+        public async Task DefineChaptersProject([FromRoute]Guid projectId, ProjectChapterDefineRequest request)
+        {
+            request.ProjectId = projectId;
+            await ProjectApp.DefineChapterAsync(request);
         }
     }
 }

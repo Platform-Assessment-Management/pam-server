@@ -20,10 +20,6 @@ namespace PAMDomain.MaturityModels
 
         public List<OptionsDomain> Options { get; private set; }
 
-        public List<Guid> ChaptersIds { get; private set; }
-
-        public List<ChapterDomain> Chapters { get; private set; }
-
         public static async Task<MaturityModelDomain> CreateAsync(string name, string description, int order)
         {
             var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
@@ -70,22 +66,6 @@ namespace PAMDomain.MaturityModels
             option.SetLevel(level);
 
             var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
-            await maturityRepo.SaveAsync(this);
-        }
-
-        public async Task DefineChaptersAsync(IList<Guid> chaptersIds)
-        {
-            var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
-            var chapters = await maturityRepo.GetChaptersAsync(chaptersIds.ToArray());
-
-            var chaptersNotFound = chaptersIds.Where(c => !chapters.Any(ch => ch.ChapterId == c));
-
-            if (chaptersNotFound != null && chaptersNotFound.Count() > 0)
-                throw new ChapterMaturityModelNotFoundException(this, chaptersNotFound.ToArray());
-
-            this.Chapters = chapters.ToList();
-            this.ChaptersIds = chaptersIds.ToList();
-
             await maturityRepo.SaveAsync(this);
         }
     }

@@ -15,12 +15,14 @@ namespace PAMRepository.Impl
         private IMongoCollection<MaturityModelDomain> maturityModelsDatabase;
         private IMongoCollection<MaturityModelProjectDomain> maturityModelsProjectDatabase;
         private IMongoCollection<ChapterDomain> maturityModelsChapterDatabase;
+        private IMongoCollection<CampDomain> maturityModelsCampDatabase;
 
         public MaturityModelRepository(IPAMDatabaseSettings settings, IMongoDatabase database)
         {
             maturityModelsDatabase = database.GetCollection<MaturityModelDomain>(settings.MaturityModelsCollectionName);
             maturityModelsProjectDatabase = database.GetCollection<MaturityModelProjectDomain>(settings.MaturityProjectCollectionName);
             maturityModelsChapterDatabase = database.GetCollection<ChapterDomain>(settings.ChapterCollectionName);
+            maturityModelsCampDatabase = database.GetCollection<CampDomain>(settings.CampCollectionName);
         }
 
         public async Task<MaturityModelDomain> GetAsync(Guid maturityModelId)
@@ -66,6 +68,18 @@ namespace PAMRepository.Impl
         public async Task<IList<ChapterDomain>> GetChaptersAsync(params Guid[] chapterIds)
         {
             return await (await maturityModelsChapterDatabase.FindAsync(c => chapterIds.Contains(c.ChapterId))).ToListAsync();
+        }
+
+        public async Task<IList<CampDomain>> GetCampsAsync(Guid? campId = null)
+        {
+            var boolHasCamp = campId.HasValue;
+            Guid campIdValue = campId.HasValue ? campId.Value : new Guid();
+            return await (await this.maturityModelsCampDatabase.FindAsync(c => !boolHasCamp || c.CampId == campIdValue)).ToListAsync();
+        }
+
+        public async Task SaveCampAsync(CampDomain camp)
+        {
+            await this.maturityModelsCampDatabase.ReplaceOneAsync(c => c.CampId == camp.CampId, camp, new ReplaceOptions { IsUpsert = true });
         }
     }
 }

@@ -9,7 +9,5 @@ namespace PAMDomain.MaturityModels
         public Guid ProjectId { get; private set; }
 
         public List<Guid> Chapters {get;private set;}
-
-        public List<KeyValuePair<Guid, int>> Maturities { get; private set; }
     }
 }

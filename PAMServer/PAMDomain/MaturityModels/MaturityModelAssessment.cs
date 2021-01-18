@@ -8,7 +8,7 @@ namespace PAMDomain.MaturityModels
 {
     public class MaturityModelAssessment
     {
-        public static async Task<MaturityModelAssessmentResult> Compute(Guid projectId)
+        public static async Task<MaturityModelAssessmentResult> ComputeAsync(Guid projectId)
         {
             var mmResult = new MaturityModelAssessmentResult();
 
@@ -40,9 +40,6 @@ namespace PAMDomain.MaturityModels
                         {
                             if (options.Level > maxOpt)
                                 maxOpt = options.Level;
-
-                            if (project.Maturities.Exists(p => p.Key == mm.MaturityModelId && p.Value == options.Value))
-                                currentOpt = options.Level;
                         }
 
                         sumCamp += maxOpt;

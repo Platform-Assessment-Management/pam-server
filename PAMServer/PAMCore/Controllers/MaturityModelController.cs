@@ -5,17 +5,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PAMApplication;
+using PAMApplication.CampContracts;
 using PAMApplication.MaturityModelContracts;
 
 namespace PAMCore.Controllers
 {
     [Route("api/v1/[controller]")]
     [ApiController]
-    public class MaturyModelController : ControllerBase
+    public class MaturityModelController : ControllerBase
     {
         private MaturityModelApplication maturityApp;
 
-        public MaturyModelController(MaturityModelApplication matirityApp) => this.maturityApp = matirityApp;
+        public MaturityModelController(MaturityModelApplication matirityApp) => this.maturityApp = matirityApp;
 
         [HttpGet]
         public async Task<IList<MaturityModelListResponse>> List()
@@ -44,17 +45,29 @@ namespace PAMCore.Controllers
             await maturityApp.AlterOptionAsync(request);
         }
 
-        [HttpPost("{maturityId}/chapters")]
-        public async Task DefineChapters([FromRoute] Guid maturityId, MaturityModelDefineChaptersRequest request)
-        {
-            request.MaturityId = maturityId;
-            await maturityApp.DefineChaptersAsync(request);
-        }
-
-        [HttpGet("project/{projectId}/camp")]
+        [HttpGet("camp/project/{projectId}")]
         public async Task GetValidation(Guid projectId)
         {
             await maturityApp.Assesment(projectId);
+        }
+
+        [HttpPost("camp")]
+        public async Task<CampCreateResponse> GetCamp(CampCreateRequest request)
+        {
+            return await maturityApp.CreateCampAsync(request);
+        }
+
+        [HttpPut("camp")]
+        public async Task CreateCamp(CampAlterRequest request)
+        {
+            await this.maturityApp.AlterCampAsync(request);
+        }
+
+        [HttpGet("camp")]
+        public async Task<CampListResponse> AlterCamp()
+        {
+            return await this.maturityApp.ListCampAsync();
+
         }
     }
 }
