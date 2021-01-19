@@ -78,6 +78,23 @@ namespace PAMApplication
             };
         }
 
+        public async Task DefineMaturityModelCampAsync(MaturityModelCampDefineRequest request)
+        {
+            var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
+
+            var camp = (await maturityModelRepo.GetCampsAsync(request.CampId)).FirstOrDefault();
+            if (camp == null)
+                throw new CampNotFoundException(request.CampId);
+
+            var mm = await maturityModelRepo.GetAsync(request.MaturityModelId);
+            if (mm == null)
+                throw new MaturityModelNotFoundException(request.MaturityModelId);
+
+            await camp.DefineMaturtyModelAsync(mm, request.Level);
+
+            
+        }
+
         public async Task IncludeOption(MaturityModelIncludeOptionRequest request)
         {
             var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
@@ -111,9 +128,45 @@ namespace PAMApplication
             await mm.AlterOptionAsync(request.value, request.Name, request.Level);
         }
 
-        public async Task Assesment(Guid projectId)
+        public async Task<MaturityModelAssessmentResponse> Assesment(Guid projectId)
         {
-            await MaturityModelAssessment.ComputeAsync(projectId);
+            var result = await MaturityModelAssessment.ComputeAsync(projectId);
+
+            var response = new MaturityModelAssessmentResponse();
+            response.Chapters = result.Chapters.Select(c =>
+            {
+                return new ChapterAssessmentResultDTO
+                {
+                    ChapterId = c.ChapterId,
+                    Name = c.Name,
+                    Camps = c.Camps.Select(cc =>
+                    {
+                        return new CampsAssessmentResultDTO
+                        {
+                            CampId = cc.CampId,
+                            Name = cc.Name,
+                            Order = cc.Order,
+                            Approved = cc.Approved,
+                            MaturityModel = cc.MaturityModel.Select(ccm =>
+                            {
+                                return new MaturityModelAssessmentResultDTO
+                                {
+                                    MaturityModelId = ccm.MaturityModelId,
+                                    Name = ccm.Name,
+                                    MaxLevel = ccm.MaxLevel,
+                                    MinimalLevel = ccm.MinimalLevel,
+                                    CurrenteLevel = ccm.CurrenteLevel,
+                                    Approved = ccm.Approved,
+                                    Level = ccm.Level
+                                };
+                            }).ToList()
+                        };
+                    }).ToList(),
+                    CurrentCamp = c.CurrentCamp
+                };
+            }).ToList();
+
+            return response;
         }
     }
 }

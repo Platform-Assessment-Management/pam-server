@@ -55,15 +55,28 @@ namespace PAMDomain.MaturityModels
             return option;
         }
 
-        public async Task AlterOptionAsync(int value, string name, int level)
+        public int LevelOf(int value)
+        {
+            return Options.Where(o => o.Value == value).Select(o => o.Level).FirstOrDefault();
+        }
+
+        public int MaxLevel()
+        {
+            return Options.Max(o => o.Level);
+        }
+
+        public async Task AlterOptionAsync(int value, string name, int? level)
         {
             var option = this.Options.Where(o => o.Value == value).FirstOrDefault();
 
             if (option == null)
                 throw new OptionMaturityModelNotFoundException(this, value);
 
-            option.SetName(name);
-            option.SetLevel(level);
+            if(!string.IsNullOrEmpty(name))
+                option.SetName(name);
+
+            if(level.HasValue)
+                option.SetLevel(level.Value);
 
             var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
             await maturityRepo.SaveAsync(this);

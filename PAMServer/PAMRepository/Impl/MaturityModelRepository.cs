@@ -13,14 +13,16 @@ namespace PAMRepository.Impl
     public class MaturityModelRepository : IMaturityModelRepository
     {
         private IMongoCollection<MaturityModelDomain> maturityModelsDatabase;
-        private IMongoCollection<MaturityModelProjectDomain> maturityModelsProjectDatabase;
+        private IMongoCollection<MaturityModelProjectOptionDomain> maturityModelsProjectDatabase;
+        private IMongoCollection<MaturityModelProjectDomain> projectDatabase;
         private IMongoCollection<ChapterDomain> maturityModelsChapterDatabase;
         private IMongoCollection<CampDomain> maturityModelsCampDatabase;
 
         public MaturityModelRepository(IPAMDatabaseSettings settings, IMongoDatabase database)
         {
             maturityModelsDatabase = database.GetCollection<MaturityModelDomain>(settings.MaturityModelsCollectionName);
-            maturityModelsProjectDatabase = database.GetCollection<MaturityModelProjectDomain>(settings.MaturityProjectCollectionName);
+            maturityModelsProjectDatabase = database.GetCollection<MaturityModelProjectOptionDomain>(settings.MaturityProjectCollectionName);
+            projectDatabase = database.GetCollection<MaturityModelProjectDomain>(settings.ProjectCollectionName);
             maturityModelsChapterDatabase = database.GetCollection<ChapterDomain>(settings.ChapterCollectionName);
             maturityModelsCampDatabase = database.GetCollection<CampDomain>(settings.CampCollectionName);
         }
@@ -30,29 +32,24 @@ namespace PAMRepository.Impl
             return await (await maturityModelsDatabase.FindAsync(m => m.MaturityModelId == maturityModelId)).FirstOrDefaultAsync();
         }
 
-        public async Task<IList<MaturityModelDomain>> Get(params Guid[] maturityModelId)
+        public async Task<IList<MaturityModelDomain>> GetAsync(params Guid[] maturityModelId)
         {
             return await (await maturityModelsDatabase.FindAsync(m => maturityModelId.Contains(m.MaturityModelId))).ToListAsync();
         }
 
-        public Task<IList<CampDomain>> GetCampsByChapters(Guid[] guids)
+        public async Task<IList<CampDomain>> GetCampsByChapters(Guid[] guids)
+        {
+            return await (await maturityModelsCampDatabase.FindAsync(c => guids.Contains(c.ChapterId))).ToListAsync();
+        }
+
+        public async Task<IList<MaturityModelDomain>> GetMaturitiesByChapters(params Guid[] guids)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IList<MaturityModelDomain>> GetMaturitiesByChapters(params Guid[] guids)
+        public async Task<MaturityModelProjectDomain> GetProjectAsync(Guid projectId)
         {
-            throw new NotImplementedException();
-        }
-
-        public async Task<IList<MaturityModelProjectDomain>> GetMaturityProjectAsync(Guid projectId)
-        {
-            return await (await maturityModelsProjectDatabase.FindAsync(x => x.ProjectId == projectId)).ToListAsync();
-        }
-
-        public Task<MaturityModelProjectDomain> GetProjectAsync(Guid projectId)
-        {
-            throw new NotImplementedException();
+            return await (await this.projectDatabase.FindAsync(m => m.ProjectId == projectId)).FirstOrDefaultAsync();
         }
 
         public async Task<IList<MaturityModelDomain>> ListAsync()
@@ -80,6 +77,11 @@ namespace PAMRepository.Impl
         public async Task SaveCampAsync(CampDomain camp)
         {
             await this.maturityModelsCampDatabase.ReplaceOneAsync(c => c.CampId == camp.CampId, camp, new ReplaceOptions { IsUpsert = true });
+        }
+
+        public async Task<List<MaturityModelProjectOptionDomain>> GetProjectMaturityAsync(Guid projectId)
+        {
+            return await (await this.maturityModelsProjectDatabase.FindAsync(m => m.ProjectId == projectId)).ToListAsync();
         }
     }
 }

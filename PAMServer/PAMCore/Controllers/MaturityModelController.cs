@@ -10,7 +10,7 @@ using PAMApplication.MaturityModelContracts;
 
 namespace PAMCore.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/v1")]
     [ApiController]
     public class MaturityModelController : ControllerBase
     {
@@ -18,26 +18,26 @@ namespace PAMCore.Controllers
 
         public MaturityModelController(MaturityModelApplication matirityApp) => this.maturityApp = matirityApp;
 
-        [HttpGet]
+        [HttpGet("maturitymodel")]
         public async Task<IList<MaturityModelListResponse>> List()
         {
             return await maturityApp.ListMaturityModels();
         }
 
-        [HttpPost]
+        [HttpPost("maturitymodel")]
         public async Task<MaturityModelCreateResponse> CreateMaturityModel(MaturityModelCreateRequest request)
         {
             return await maturityApp.CreateMaturity(request);
         }
 
-        [HttpPost("{maturityId}/options")]
+        [HttpPost("maturitymodel/{maturityId}/options")]
         public async Task IncludeOptions([FromRoute]Guid maturityId, MaturityModelIncludeOptionRequest request)
         {
             request.MaturityId = maturityId;
             await maturityApp.IncludeOption(request);
         }
 
-        [HttpPut("{maturityId}/options/{value}")]
+        [HttpPut("maturitymodel/{maturityId}/options/{value}")]
         public async Task IncludeOptions([FromRoute] Guid maturityId, [FromRoute] int value, MaturityModelAlterOptionRequest request)
         {
             request.MaturityId = maturityId;
@@ -46,13 +46,13 @@ namespace PAMCore.Controllers
         }
 
         [HttpGet("camp/project/{projectId}")]
-        public async Task GetValidation(Guid projectId)
+        public async Task<MaturityModelAssessmentResponse> GetValidation(Guid projectId)
         {
-            await maturityApp.Assesment(projectId);
+            return await maturityApp.Assesment(projectId);
         }
 
         [HttpPost("camp")]
-        public async Task<CampCreateResponse> GetCamp(CampCreateRequest request)
+        public async Task<CampCreateResponse> CreateCamp(CampCreateRequest request)
         {
             return await maturityApp.CreateCampAsync(request);
         }
@@ -64,10 +64,27 @@ namespace PAMCore.Controllers
         }
 
         [HttpGet("camp")]
-        public async Task<CampListResponse> AlterCamp()
+        public async Task<CampListResponse> getCamp()
         {
             return await this.maturityApp.ListCampAsync();
 
+        }
+
+        [HttpPost("camp/{campId}/maturitymodel/{maturityModelId}/level/{level}")]
+        public async Task DefineMaturityModelCamp([FromRoute] Guid campId, [FromRoute] Guid maturityModelId, [FromRoute] int level)
+        {
+            await maturityApp.DefineMaturityModelCampAsync(new MaturityModelCampDefineRequest
+            {
+                CampId = campId,
+                MaturityModelId = maturityModelId,
+                Level = level
+            });
+        }
+
+        [HttpDelete("camp/{campId}/maturitymodel/{maturitymodel}")]
+        public Task RemoveMaturityModelCamp()
+        {
+            throw new NotImplementedException();
         }
     }
 }

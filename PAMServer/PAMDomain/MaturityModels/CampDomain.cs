@@ -46,6 +46,16 @@ namespace PAMDomain.MaturityModels
             return camp;
         }
 
+        public  bool ContainsMaturity(Guid maturityModelId)
+        {
+            return CampLevel.Any(c => c.Key == maturityModelId);
+        }
+
+        public float LevelOfMaturity(Guid maturityModelId)
+        {
+            return CampLevel.Where(c => c.Key == maturityModelId).Select(c => c.Value).FirstOrDefault();
+        }
+
         public async Task AlterAsync(String? name, String? description, int? order, Guid? chapterId)
         {
             if (name != null && name.Length > 0)
@@ -76,7 +86,19 @@ namespace PAMDomain.MaturityModels
             if (chapter == null)
                 throw new ChapterMaturityModelNotFoundException(this, chapterId);
 
+            this.ChapterId = chapterId;
             this.Chapter = chapter;
+        }
+
+        public async Task DefineMaturtyModelAsync(MaturityModelDomain mm, int level)
+        {
+            if (CampLevel == null)
+                CampLevel = new List<KeyValuePair<Guid, float>>();
+
+            CampLevel.Add(new KeyValuePair<Guid, float>(mm.MaturityModelId, level));
+
+            var mmRepo = UtilDomain.GetService<IMaturityModelRepository>();
+            await mmRepo.SaveCampAsync(this);
         }
     }
 }

@@ -12,6 +12,6 @@ namespace PAMApplication.MaturityModelContracts
 
         public string Name { get; set; }
 
-        public int Level { get; set; }
+        public int? Level { get; set; }
     }
 }

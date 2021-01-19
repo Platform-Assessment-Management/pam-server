@@ -27,6 +27,20 @@ namespace PAMRepository
                 p.MapIdField(x => x.ProjectId);
                 p.MapMember(x => x.PlatformId);
                 p.MapMember(x => x.Name);
+                p.MapMember(x => x.ChaptersIds);
+            });
+
+            BsonClassMap.RegisterClassMap<MaturityModelProjectDomain>(p =>
+            {
+                p.MapIdField(x => x.ProjectId);
+                p.MapMember(x => x.ChaptersIds);
+            });
+
+            BsonClassMap.RegisterClassMap<MaturityModelProjectOptionDomain>(p =>
+            {
+                p.MapMember(x => x.MaturityModelId);
+                p.MapMember(x => x.ProjectId);
+                p.MapMember(x => x.Value);
             });
 
             BsonClassMap.RegisterClassMap<MaturityModelDefined>(p => {
@@ -50,6 +64,7 @@ namespace PAMRepository
                 p.MapMember(x => x.Description);
                 p.MapMember(x => x.Order);
                 p.MapMember(x => x.CampLevel);
+                p.MapMember(x => x.ChapterId);
             });
 
             BsonClassMap.RegisterClassMap<OptionsDomain>(p => {

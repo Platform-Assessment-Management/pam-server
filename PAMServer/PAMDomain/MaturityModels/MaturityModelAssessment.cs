@@ -10,50 +10,35 @@ namespace PAMDomain.MaturityModels
     {
         public static async Task<MaturityModelAssessmentResult> ComputeAsync(Guid projectId)
         {
+            var result = new MaturityModelAssessmentResult();
             var mmResult = new MaturityModelAssessmentResult();
 
             var maturityRepo = UtilDomain.GetService<IMaturityModelRepository>();
 
             var project = await maturityRepo.GetProjectAsync(projectId);
-            var chapterIds = project.Chapters.ToList();
 
-            var maturityModels = await maturityRepo.GetMaturitiesByChapters(chapterIds.ToArray());
-            var camps = await maturityRepo.GetCampsByChapters(chapterIds.ToArray());
+            var chapterIds = project.ChaptersIds.ToArray();
+            var chapters = await maturityRepo.GetChaptersAsync(chapterIds);
+            var camps = await maturityRepo.GetCampsByChapters(chapterIds);
 
-            foreach(var chapterId in chapterIds)
+            var maturityModels = await maturityRepo.GetAsync(camps.Where(c => c.CampLevel != null).SelectMany(c => c.CampLevel.Select(cl => cl.Key)).ToArray());
+
+            foreach (var chapter in chapters)
             {
-                var campsByChap = camps.Where(camp => camp.Chapter.ChapterId == chapterId).ToList();
+                var chapterResult = result.AddChapters(chapter);
 
-                foreach(var camp in campsByChap)
+                foreach (var camp in camps)
                 {
-                    var MMs = maturityModels.Where(m => camp.CampLevel.Exists(cl => cl.Key == m.MaturityModelId)).ToList();
+                    var campResult = chapterResult.AddCamps(camp);
 
-                    var sumCamp = 0;
-                    var currentCamp = 0;
-
-                    foreach (var mm in MMs)
+                    foreach(var mm in maturityModels.Where(m => camp.ContainsMaturity(m.MaturityModelId)))
                     {
-                        int maxOpt = 0;
-                        int currentOpt = 0;
-
-                        foreach (var options in mm.Options)
-                        {
-                            if (options.Level > maxOpt)
-                                maxOpt = options.Level;
-                        }
-
-                        sumCamp += maxOpt;
-                        currentCamp += currentOpt;
-
-                        mmResult.SetMaturity(mm, currentOpt / maxOpt);
+                        campResult.Validade(mm, project);
                     }
-
-                    mmResult.SetCamp(camp, currentCamp / sumCamp);
-                    
                 }
             }
 
-            return mmResult;
+            return result;
         }
     }
 }

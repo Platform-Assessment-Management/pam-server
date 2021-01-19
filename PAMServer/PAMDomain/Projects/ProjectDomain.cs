@@ -14,13 +14,15 @@ namespace PAMDomain.Projects
         public Guid PlatformId { get; private set; }
         public String Name { get; private set; }
 
-        private PlatformDomain _PlatformDomain;
+        private PlatformDomain _platformDomain;
         public Lazy<PlatformDomain> PlatformDomain => new Lazy<PlatformDomain>(() => LoadPlatform());
 
-        public List<Guid> ChaptersIds { get; private set; }
-        public List<ChapterDomain> Chapters { get; private set; }
+        public IList<Guid> ChaptersIds { get; private set; }
 
-        private List<MaturityModelDefined> _MaturityModels;
+        private IList<ChapterDomain> _chapters;
+        public Lazy<IList<ChapterDomain>> Chapters => new Lazy<IList<ChapterDomain>>(() => LoadChapters());
+
+        private List<MaturityModelDefined> _maturityModels;
         public Lazy<List<MaturityModelDefined>> MaturityModels => new Lazy<List<MaturityModelDefined>>(() => LoadMaturityModelDefined());
 
         
@@ -39,7 +41,7 @@ namespace PAMDomain.Projects
                 ProjectId = Guid.NewGuid(),
                 PlatformId = platformId,
                 Name = name,
-                _PlatformDomain = platformDomain
+                _platformDomain = platformDomain
             };
 
             return p;
@@ -72,6 +74,15 @@ namespace PAMDomain.Projects
         {
             var projectRepo = UtilDomain.GetService<IProjectRepository>();
             var chapters = await projectRepo.GetChapters(chaptersId);
+
+            var chaptersNotFound = chaptersId.Where(ci => !chapters.Any(c => c.ChapterId == ci)).ToArray();
+            if (chaptersNotFound.Length > 0)
+                throw new ChapterProjectNotFoundException(this, chaptersNotFound);
+
+            this.ChaptersIds = chaptersId;
+            this._chapters = chapters;
+
+            await projectRepo.Save(this);
         }
 
         public async Task SaveAsync()
@@ -82,29 +93,35 @@ namespace PAMDomain.Projects
 
         private PlatformDomain LoadPlatform()
         {
-            if (_PlatformDomain == null)
+            if (_platformDomain == null)
             {
                 var platformRepo = UtilDomain.GetService<IPlatformRepository>();
-                _PlatformDomain = platformRepo.Get(this.PlatformId).Result;
+                _platformDomain = platformRepo.Get(this.PlatformId).Result;
             }
 
-            return _PlatformDomain;
+            return _platformDomain;
         }
 
-        private List<ChapterDomain> LoadChapters()
+        private IList<ChapterDomain> LoadChapters()
         {
-            throw new NotImplementedException();
+            if(_chapters == null)
+            {
+                var projectRepo = UtilDomain.GetService<IProjectRepository>();
+                _chapters = projectRepo.GetChapters(ChaptersIds).Result;
+            }
+
+            return _chapters;
         }
 
         private List<MaturityModelDefined> LoadMaturityModelDefined()
         {
-            if (_MaturityModels == null)
+            if (_maturityModels == null)
             {
                 var projectRepo = UtilDomain.GetService<IProjectRepository>();
-                _MaturityModels = projectRepo.GetMaturityModel(this.ProjectId).Result;
+                _maturityModels = projectRepo.GetMaturityModel(this.ProjectId).Result;
             }
 
-            return _MaturityModels;
+            return _maturityModels;
         }
     }
 }
